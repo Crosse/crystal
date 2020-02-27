@@ -1,4 +1,7 @@
 require "c/dirent"
+{% if flag?(:solaris) %}
+  require "c/limits"
+{% end %}
 
 module Crystal::System::Dir
   def self.open(path : String) : LibC::DIR*
@@ -13,7 +16,11 @@ module Crystal::System::Dir
     Errno.value = 0
     if entry = LibC.readdir(dir)
       name = String.new(entry.value.d_name.to_unsafe)
-      dir = entry.value.d_type == LibC::DT_DIR
+      {% if flag?(:solaris) %}
+        dir = File.info?(name, true).try(&.directory?) || false
+      {% else %}
+        dir = entry.value.d_type == LibC::DT_DIR
+      {% end %}
       Entry.new(name, dir)
     elsif Errno.value != 0
       raise Errno.new("readdir")
@@ -33,7 +40,11 @@ module Crystal::System::Dir
   end
 
   def self.current : String
-    unless dir = LibC.getcwd(nil, 0)
+    size = 0
+    {% if flag?(:solaris) %}
+      size = LibC::PATH_MAX
+    {% end %}
+    unless dir = LibC.getcwd(nil, size)
       raise Errno.new("getcwd")
     end
 

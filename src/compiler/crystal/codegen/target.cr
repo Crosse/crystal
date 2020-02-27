@@ -76,12 +76,16 @@ class Crystal::Codegen::Target
     @environment.starts_with?("openbsd")
   end
 
+  def solaris?
+    @environment.starts_with?("solaris")
+  end
+
   def linux?
     @environment.starts_with?("linux")
   end
 
   def unix?
-    macos? || freebsd? || openbsd? || linux?
+    macos? || freebsd? || openbsd? || solaris? || linux?
   end
 
   def gnu?

@@ -12,6 +12,10 @@
   @[Link("gc", static: true)]
 {% end %}
 
+{% if flag?(:solaris) %}
+  @[Link("ssp")]
+{% end %}
+
 lib LibGC
   alias Int = LibC::Int
   alias SizeT = LibC::SizeT

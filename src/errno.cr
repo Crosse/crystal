@@ -8,6 +8,8 @@ lib LibC
     fun __error : Int*
   {% elsif flag?(:openbsd) %}
     fun __error = __errno : Int*
+  {% elsif flag?(:solaris) %}
+    fun __error = ___errno : Int*
   {% elsif flag?(:win32) %}
     fun _get_errno(value : Int*) : ErrnoT
     fun _set_errno(value : Int) : ErrnoT
@@ -223,7 +225,7 @@ class Errno < Exception
   def self.value : LibC::Int
     {% if flag?(:linux) %}
       LibC.__errno_location.value
-    {% elsif flag?(:darwin) || flag?(:freebsd) || flag?(:openbsd) %}
+    {% elsif flag?(:darwin) || flag?(:freebsd) || flag?(:openbsd) || flag?(:solaris) %}
       LibC.__error.value
     {% elsif flag?(:win32) %}
       ret = LibC._get_errno(out errno)
@@ -236,7 +238,7 @@ class Errno < Exception
   def self.value=(value)
     {% if flag?(:linux) %}
       LibC.__errno_location.value = value
-    {% elsif flag?(:darwin) || flag?(:freebsd) || flag?(:openbsd) %}
+    {% elsif flag?(:darwin) || flag?(:freebsd) || flag?(:openbsd) || flag?(:solaris) %}
       LibC.__error.value = value
     {% elsif flag?(:win32) %}
       ret = LibC._set_errno(value)
